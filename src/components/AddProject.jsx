@@ -1,31 +1,35 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { firebase } from '../firebase';
-import { generatePushId } from '../helpers';
-import { useProjectsValue } from '../context';
+import React, { useState } from 'react'
+import PropTypes from 'prop-types'
+import { addDoc, collection, getFirestore } from 'firebase/firestore'
+import { generatePushId } from '../helpers'
+import { useProjectsValue } from '../context'
+import { firebase } from '../firebase'
+const db = getFirestore(firebase)
 
 export const AddProject = ({ shouldShow = false }) => {
-  const [show, setShow] = useState(shouldShow);
-  const [projectName, setProjectName] = useState('');
+  const [show, setShow] = useState(shouldShow)
+  const [projectName, setProjectName] = useState('')
 
-  const projectId = generatePushId();
-  const { projects, setProjects } = useProjectsValue();
+  const projectId = generatePushId()
+  const { projects, setProjects } = useProjectsValue()
 
-  const addProject = () =>
-    projectName &&
-    firebase
-      .firestore()
-      .collection('projects')
-      .add({
-        projectId,
-        name: projectName,
-        userId: 'jlIFXIwyAL3tzHMtzRbw',
-      })
-      .then(() => {
-        setProjects([...projects]);
-        setProjectName('');
-        setShow(false);
-      });
+  const addProject = async () => {
+    if (projectName) {
+      try {
+        await addDoc(collection(db, 'projects'), {
+          projectId,
+          name: projectName,
+          userId: 'jlIFXIwyAL3tzHMtzRbw'
+        })
+
+        setProjects([...projects])
+        setProjectName('')
+        setShow(false)
+      } catch (error) {
+        console.error('Error adding project: ', error)
+      }
+    }
+  }
 
   return (
     <div className="add-project" data-testid="add-project">
@@ -33,7 +37,7 @@ export const AddProject = ({ shouldShow = false }) => {
         <div className="add-project__input" data-testid="add-project-inner">
           <input
             value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
+            onChange={e => setProjectName(e.target.value)}
             className="add-project__name"
             data-testid="project-name"
             type="text"
@@ -52,8 +56,8 @@ export const AddProject = ({ shouldShow = false }) => {
             data-testid="hide-project-overlay"
             className="add-project__cancel"
             onClick={() => setShow(false)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') setShow(false);
+            onKeyDown={e => {
+              if (e.key === 'Enter') setShow(false)
             }}
             role="button"
             tabIndex={0}
@@ -68,8 +72,8 @@ export const AddProject = ({ shouldShow = false }) => {
         data-testid="add-project-action"
         className="add-project__text"
         onClick={() => setShow(!show)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') setShow(!show);
+        onKeyDown={e => {
+          if (e.key === 'Enter') setShow(!show)
         }}
         role="button"
         tabIndex={0}
@@ -77,9 +81,9 @@ export const AddProject = ({ shouldShow = false }) => {
         Add Project
       </span>
     </div>
-  );
-};
+  )
+}
 
 AddProject.propTypes = {
-  shouldShow: PropTypes.bool,
-};
+  shouldShow: PropTypes.bool
+}

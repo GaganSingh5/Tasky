@@ -1,25 +1,26 @@
-import React, { useState } from 'react';
-import { FaTrashAlt } from 'react-icons/fa';
-import PropTypes from 'prop-types';
-import { useProjectsValue, useSelectedProjectValue } from '../context';
-import { firebase } from '../firebase';
+import React, { useState } from 'react'
+import { FaTrashAlt } from 'react-icons/fa'
+import PropTypes from 'prop-types'
+import { useProjectsValue, useSelectedProjectValue } from '../context'
+import { doc, deleteDoc, getFirestore } from 'firebase/firestore'
+import { firebase } from '../firebase'
+const db = getFirestore(firebase)
 
 export const IndividualProject = ({ project }) => {
-  const [showConfirm, setShowConfirm] = useState(false);
-  const { projects, setProjects } = useProjectsValue();
-  const { setSelectedProject } = useSelectedProjectValue();
+  const [showConfirm, setShowConfirm] = useState(false)
+  const { projects, setProjects } = useProjectsValue()
+  const { setSelectedProject } = useSelectedProjectValue()
 
-  const deleteProject = (docId) => {
-    firebase
-      .firestore()
-      .collection('projects')
-      .doc(docId)
-      .delete()
-      .then(() => {
-        setProjects([...projects]);
-        setSelectedProject('INBOX');
-      });
-  };
+  const deleteProject = async docId => {
+    try {
+      const projectRef = doc(db, 'projects', docId)
+      await deleteDoc(projectRef)
+      setProjects([...projects])
+      setSelectedProject('INBOX')
+    } catch (error) {
+      console.error('Error deleting project: ', error)
+    }
+  }
 
   return (
     <>
@@ -29,8 +30,8 @@ export const IndividualProject = ({ project }) => {
         className="sidebar__project-delete"
         data-testid="delete-project"
         onClick={() => setShowConfirm(!showConfirm)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') setShowConfirm(!showConfirm);
+        onKeyDown={e => {
+          if (e.key === 'Enter') setShowConfirm(!showConfirm)
         }}
         tabIndex={0}
         role="button"
@@ -49,8 +50,8 @@ export const IndividualProject = ({ project }) => {
               </button>
               <span
                 onClick={() => setShowConfirm(!showConfirm)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') setShowConfirm(!showConfirm);
+                onKeyDown={e => {
+                  if (e.key === 'Enter') setShowConfirm(!showConfirm)
                 }}
                 tabIndex={0}
                 role="button"
@@ -63,9 +64,12 @@ export const IndividualProject = ({ project }) => {
         )}
       </span>
     </>
-  );
-};
+  )
+}
 
 IndividualProject.propTypes = {
-  project: PropTypes.object.isRequired,
-};
+  project: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    docId: PropTypes.string.isRequired
+  }).isRequired
+}

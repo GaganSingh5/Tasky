@@ -1,13 +1,31 @@
 import { collatedTasks } from '../constants';
 
-export const getTitle = (projects, projectId) =>
+interface Project {
+  name: string;
+  projectId: string;
+  userId: string
+}
+
+export const getTitle = (projects: Project[], projectId: string): Project | undefined =>
   projects.find(project => project.projectId === projectId);
 
-export const getCollatedTitle = (projects, key) =>
+interface CollatedProject {
+  key: string;
+}
+
+export const getCollatedTitle = (projects: CollatedProject[], key: string): CollatedProject | undefined =>
   projects.find(project => project.key === key);
 
-export const collatedTasksExist = selectedProject =>
-  collatedTasks.find(task => task.key === selectedProject);
+interface SelectedProject {
+  key: string;
+}
+
+interface CollatedTask {
+  key: string;
+}
+
+export const collatedTasksExist = (selectedProject: SelectedProject): boolean =>
+  collatedTasks.some((task: CollatedTask) => task.key === selectedProject.key);
 
 export const generatePushId = (() => {
   const PUSH_CHARS =

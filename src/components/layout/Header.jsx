@@ -11,7 +11,7 @@ export const Header = ({ darkMode, setDarkMode }) => {
     <header className="header" data-testid="header">
       <nav>
         <div className="logo">
-          <img src="/images/logo.png" alt="Todoist" />
+          <img src="/images/logo.png" alt="Tasky" />
         </div>
         <div className="settings">
           <ul>
